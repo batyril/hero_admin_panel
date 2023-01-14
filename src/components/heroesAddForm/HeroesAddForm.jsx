@@ -1,23 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useDispatch, useSelector } from 'react-redux';
+import { addHeroes } from '../../redux/actions';
 
-// Задача для этого компонента:
-// Реализовать создание нового героя с введенными данными. Он должен попадать
-// в общее состояние и отображаться в списке + фильтроваться
-// Уникальный идентификатор персонажа можно сгенерировать через uiid
-// Усложненная задача:
-// Персонаж создается и в файле json при помощи метода POST
-// Дополнительно:
-// Элементы <option></option> желательно сформировать на базе
-// данных из фильтров
-
+const defaultSelectValue = 'default';
+const defaultValue = '';
 function HeroesAddForm() {
+  const [inputValue, setInputValue] = useState(defaultValue);
+  const [textareaValue, setTextareaValue] = useState(defaultValue);
+  const options = useSelector((state) => state.filters);
+  const [textSelectValue, setTextSelectValue] = useState(defaultSelectValue);
+  const dispatch = useDispatch();
+  const clearForm = () => {
+    setInputValue(defaultValue);
+    setTextareaValue(defaultValue);
+    setTextSelectValue(defaultSelectValue);
+  };
+  const onSubmit = (event) => {
+    event.preventDefault();
+    const heroes = {
+      id: uuidv4(),
+      name: inputValue,
+      description: textareaValue,
+      element: textSelectValue,
+    };
+    dispatch(addHeroes(heroes));
+    clearForm();
+  };
+
   return (
-    <form className='border p-4 shadow-lg rounded'>
+    <form onSubmit={onSubmit} className='border p-4 shadow-lg rounded'>
       <div className='mb-3'>
         <label htmlFor='name' className='form-label fs-4'>
           Имя нового героя
         </label>
         <input
+          onChange={(event) => setInputValue(event.target.value)}
+          value={inputValue}
           required
           type='text'
           name='name'
@@ -32,6 +51,8 @@ function HeroesAddForm() {
           Описание
         </label>
         <textarea
+          value={textareaValue}
+          onChange={(event) => setTextareaValue(event.target.value)}
           required
           name='text'
           className='form-control'
@@ -45,12 +66,20 @@ function HeroesAddForm() {
         <label htmlFor='element' className='form-label'>
           Выбрать элемент героя
         </label>
-        <select required className='form-select' id='element' name='element'>
-          <option>Я владею элементом...</option>
-          <option value='fire'>Огонь</option>
-          <option value='water'>Вода</option>
-          <option value='wind'>Ветер</option>
-          <option value='earth'>Земля</option>
+        <select
+          value={textSelectValue}
+          onChange={(event) => setTextSelectValue(event.target.value)}
+          required
+          className='form-select'
+          id='element'
+          name='element'
+        >
+          <option value='default'>Я владею элементом...</option>
+          {options.map(([value, text]) => (
+            <option key={uuidv4()} value={value}>
+              {text}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -60,5 +89,9 @@ function HeroesAddForm() {
     </form>
   );
 }
+
+// + фильтроваться
+// Усложненная задача:
+// Персонаж создается и в файле json при помощи метода POST
 
 export default HeroesAddForm;

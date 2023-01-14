@@ -1,6 +1,6 @@
 import React from 'react';
 
-function HeroesListItem({ name, description, element }) {
+function HeroesListItem({ name, description, element, onDelete }) {
   let elementClassName;
 
   switch (element) {
@@ -36,6 +36,7 @@ function HeroesListItem({ name, description, element }) {
       </div>
       <span className='position-absolute top-0 start-100 translate-middle badge border rounded-pill bg-light'>
         <button
+          onClick={onDelete}
           type='button'
           className='btn-close btn-close'
           aria-label='Close'
