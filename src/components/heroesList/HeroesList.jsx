@@ -10,26 +10,36 @@ import {
 import HeroesListItem from '../heroesListItem/HeroesListItem';
 import Spinner from '../spinner/Spinner';
 
-// Усложненная задача:
-// Удаление идет и с json файла при помощи метода DELETE
-
 function HeroesList() {
   const { heroes, heroesLoadingStatus } = useSelector((state) => state);
   const dispatch = useDispatch();
   const { request } = useHttp();
 
-  const onDeleteHeroes = (id) => {
-    const filteredHeroes = heroes.filter((item) => item.id !== id);
-    dispatch(deleteHeroes(filteredHeroes));
+  const deleteHeroesRequest = async (id) => {
+    try {
+      await request(`http://localhost:3001/heroes/${id}`, 'DELETE');
+      dispatch(deleteHeroes(id));
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
+
+  const getHeroes = async () => {
+    try {
+      dispatch(heroesFetching());
+      const res = await request('http://localhost:3001/heroes');
+      dispatch(heroesFetched(res));
+    } catch (e) {
+      dispatch(heroesFetchingError());
+    }
+  };
+
+  const onDeleteHeroes = async (id) => {
+    await deleteHeroesRequest(id);
   };
 
   useEffect(() => {
-    dispatch(heroesFetching());
-    request('http://localhost:3001/heroes')
-      .then((data) => dispatch(heroesFetched(data)))
-      .catch(() => dispatch(heroesFetchingError()));
-
-    // eslint-disable-next-line
+    getHeroes();
   }, []);
 
   if (heroesLoadingStatus === 'loading') {

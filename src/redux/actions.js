@@ -29,7 +29,12 @@ export const addHeroes = (heroes) => ({
   payload: heroes,
 });
 
-export const deleteHeroes = (heroes) => ({
+export const deleteHeroes = (id) => ({
   type: 'HEROES_DELETE',
+  payload: id,
+});
+
+export const filteredHeroes = (heroes) => ({
+  type: 'HEROES_FILTERED',
   payload: heroes,
 });

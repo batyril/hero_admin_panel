@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
-import { addHeroes } from '../../redux/actions';
+import {
+  heroesFetched,
+  heroesFetching,
+  heroesFetchingError,
+} from '../../redux/actions';
+import { useHttp } from '../../hooks/http.hook';
 
 const defaultSelectValue = 'default';
 const defaultValue = '';
@@ -10,13 +15,35 @@ function HeroesAddForm() {
   const [textareaValue, setTextareaValue] = useState(defaultValue);
   const options = useSelector((state) => state.filters);
   const [textSelectValue, setTextSelectValue] = useState(defaultSelectValue);
+  const { request } = useHttp();
   const dispatch = useDispatch();
   const clearForm = () => {
     setInputValue(defaultValue);
     setTextareaValue(defaultValue);
     setTextSelectValue(defaultSelectValue);
   };
-  const onSubmit = (event) => {
+
+  const getHeroes = async () => {
+    try {
+      dispatch(heroesFetching());
+      const res = await request('http://localhost:3001/heroes');
+      dispatch(heroesFetched(res));
+    } catch (e) {
+      dispatch(heroesFetchingError());
+    }
+  };
+  const postHeroesRequest = async (heroes) => {
+    try {
+      await request(
+        `http://localhost:3001/heroes`,
+        'POST',
+        JSON.stringify(heroes)
+      );
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
+  const onSubmit = async (event) => {
     event.preventDefault();
     const heroes = {
       id: uuidv4(),
@@ -24,7 +51,8 @@ function HeroesAddForm() {
       description: textareaValue,
       element: textSelectValue,
     };
-    dispatch(addHeroes(heroes));
+    await postHeroesRequest(heroes);
+    await getHeroes();
     clearForm();
   };
 
@@ -75,11 +103,13 @@ function HeroesAddForm() {
           name='element'
         >
           <option value='default'>Я владею элементом...</option>
-          {options.map(([value, text]) => (
-            <option key={uuidv4()} value={value}>
-              {text}
-            </option>
-          ))}
+          {options
+            .filter(([value]) => value !== 'all')
+            .map(([value, text]) => (
+              <option key={uuidv4()} value={value}>
+                {text}
+              </option>
+            ))}
         </select>
       </div>
 
@@ -89,9 +119,5 @@ function HeroesAddForm() {
     </form>
   );
 }
-
-// + фильтроваться
-// Усложненная задача:
-// Персонаж создается и в файле json при помощи метода POST
 
 export default HeroesAddForm;

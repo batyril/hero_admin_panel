@@ -15,13 +15,18 @@ function App() {
   const dispatch = useDispatch();
   const { request } = useHttp();
 
-  useEffect(() => {
-    dispatch(filtersFetching());
-    request('http://localhost:3001/filters')
-      .then((data) => dispatch(filtersFetched(data)))
-      .catch(() => dispatch(filtersFetchingError()));
+  const getFilters = async () => {
+    try {
+      dispatch(filtersFetching());
+      const res = await request('http://localhost:3001/filters');
+      dispatch(filtersFetched(res));
+    } catch (e) {
+      dispatch(filtersFetchingError());
+    }
+  };
 
-    // eslint-disable-next-line
+  useEffect(() => {
+    getFilters();
   }, []);
 
   return (
