@@ -104,9 +104,9 @@ function HeroesAddForm() {
         >
           <option value='default'>Я владею элементом...</option>
           {options
-            .filter(([value]) => value !== 'all')
-            .map(([value, text]) => (
-              <option key={uuidv4()} value={value}>
+            .filter(({ filter }) => filter !== 'all')
+            .map(({ filter, text }) => (
+              <option key={uuidv4()} value={filter}>
                 {text}
               </option>
             ))}

@@ -4,23 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { filteredHeroes } from '../../redux/actions';
 import { useHttp } from '../../hooks/http.hook';
 
-const getClassButton = (filter) => {
-  switch (filter) {
-    case 'fire':
-      return 'btn-danger';
-    case 'water':
-      return 'btn-primary';
-    case 'wind':
-      return 'btn-success';
-    case 'earth':
-      return 'btn-secondary';
-    case 'all':
-      return 'btn-outline-dark';
-    default:
-      return '';
-  }
-};
-
 function HeroesFilters() {
   const filters = useSelector((state) => state.filters);
   const dispatch = useDispatch();
@@ -49,7 +32,7 @@ function HeroesFilters() {
       <div className='card-body'>
         <p className='card-text'>Отфильтруйте героев по элементам</p>
         <div className='btn-group'>
-          {filters.map(([filter, text]) => (
+          {filters.map(({ filter, text, classText }) => (
             <button
               onClick={() => {
                 setActiveFilter(filter);
@@ -57,7 +40,7 @@ function HeroesFilters() {
               }}
               key={uuidv4()}
               type='button'
-              className={`btn ${getClassButton(filter)} ${
+              className={`btn ${classText} ${
                 activeFilter === filter ? 'active' : ''
               }`}
             >
